@@ -1,7 +1,7 @@
 import random
 
 def get_questions():
-    """Return the list of questions with options and correct answers."""
+# Return the list of questions with options and correct answers
     return {
         "What is the airspeed of an unladen swallow in miles/hr?": {
             "options": ["10", "12", "14", "16"],
@@ -14,27 +14,27 @@ def get_questions():
     }
 
 def shuffle_questions(questions):
-    """Return a shuffled list of question items."""
+# Return a shuffled list of questions
     question_list = list(questions.items())
     random.shuffle(question_list)
     return question_list
 
 def display_question(question_num, question, options):
-    """Display the question and its options."""
+# Show the question and its options
     print(f"\n{question_num}. {question}")
     for option in options:
         print(f"  - {option}")
 
 def get_user_answer():
-    """Prompt the user for an answer."""
+# Ask for an answer
     return input("Your answer: ")
 
 def check_answer(user_answer, correct_answer):
-    """Check if the user's answer is correct."""
+# Check if the answer is correct
     return user_answer == correct_answer
 
 def quiz():
-    """Main function to run the quiz."""
+# Main function to run the quiz
     score = 0
     correct_answers = []
     questions = get_questions()
@@ -51,10 +51,10 @@ def quiz():
         options = details["options"][:]
         random.shuffle(options)
         
-        # Display the question and options
+        # Show the question and options
         display_question(question_num, question, options)
         
-        # Loop until the correct answer is provided
+        # Loop until the correct answer
         while True:
             answer = get_user_answer()
             if check_answer(answer, details["correct"]):
@@ -65,13 +65,12 @@ def quiz():
             else:
                 print("Incorrect, please try again.")
         
-        question_num += 1  # Increment the question number manually
+        question_num += 1
     
-    # Display the final score and correct answers
+    # Show the final score and correct answers
     print(f"\nYour final score is {score}/{len(questions)}")
     print("\nYou answered these questions correctly:")
     for correct_question in correct_answers:
         print(f" - {correct_question}")
 
-# Run the quiz
 quiz()
