@@ -1,70 +1,89 @@
-def load_quiz(filename):
-    """
-    Loads the quiz questions from a file.
-    
-    :param filename: Name of the file containing quiz questions
-    :return: List of quiz questions, each represented as a dictionary
-    """
-    quiz = []
-    with open(filename, 'r') as file:
-        blocks = file.read().split('---')
-        for block in blocks:
-            lines = block.strip().split('\n')
-            if len(lines) >= 7:
-                question = lines[0]
-                options = lines[1:5]
-                answer = lines[5].strip()
-                explanation = lines[6]
-                quiz.append({
-                    'question': question,
-                    'options': options,
-                    'answer': answer,
-                    'explanation': explanation
-                })
-    return quiz
+import json
+import random
 
-def ask_question(question_data):
-    """
-    Asks a single quiz question and checks the user's response.
+USER_DATA_FILE = 'user_data.json'
+QUIZ_FILE = 'quiz_questions.txt'
+
+def load_data(filename):
+    with open(filename, 'r') as file:
+        return json.load(file) if filename.endswith('.json') else file.read().split('---')
+
+def save_data(data, filename):
+    with open(filename, 'w') as file:
+        json.dump(data, file)
+
+def parse_question(block):
+    lines = block.strip().split('\n')
+    return {
+        'question': lines[0],
+        'options': lines[1:5],
+        'answer': lines[5].strip(),
+        'explanation': lines[6]
+    }
+
+def get_username(users):
+    while True:
+        username = input("Enter your username: ").strip()
+        if username:
+            if username not in users:
+                users[username] = {'high_score': 0}
+                save_data(users, USER_DATA_FILE)
+                print(f"Welcome, {username}! You've been registered.")
+            else:
+                print(f"Welcome back, {username}!")
+            return username
+
+def use_fifty_fifty(question):
+    correct_answer = question['answer'].lower()
+    incorrect_options = [opt for opt in question['options'] if opt[0].lower() != correct_answer]
+    removed_options = random.sample(incorrect_options, 2)
+    return [opt for opt in question['options'] if opt not in removed_options]
+
+def ask_question(question, fifty_fifty_available):
+    print(question['question'])
+    options = question['options']
     
-    :param question_data: Dictionary containing question, options, answer, and explanation
-    :return: True if the user answered correctly, otherwise False
-    """
-    print(question_data['question'])
-    for option in question_data['options']:
+    if fifty_fifty_available:
+        use_5050 = input("Can only be used once: Would you like to eliminate 2 of the 4 wrong answers? (y/n): ").strip().lower() == 'y'
+        if use_5050:
+            options = use_fifty_fifty(question)
+            fifty_fifty_available = False
+    
+    for option in options:
         print(option)
     
     while True:
-        user_answer = input("Your answer (a/b/c/d): ").strip().lower()
-        if user_answer in ['a', 'b', 'c', 'd']:
-            break
-        else:
-            print("Invalid input. Please enter 'a', 'b', 'c', or 'd'.")
-    
-    correct_option = question_data['answer'].lower()
-    if user_answer == correct_option:
-        print("Correct!\n")
-        print(f"Explanation: {question_data['explanation']}\n")
-        return True
-    else:
-        print(f"Incorrect! The correct answer was '{correct_option.upper()}'.\n")
-        print(f"Explanation: {question_data['explanation']}\n")
-        return False
+        answer = input("Your answer (a/b/c/d): ").strip().lower()
+        if answer in 'abcd':
+            return answer == question['answer'].lower(), fifty_fifty_available
+        print("Invalid input. Please enter 'a', 'b', 'c', or 'd'.")
 
-def run_quiz(quiz):
-    """
-    Runs the entire quiz, asking each question in sequence and calculating the final score.
-    
-    :param quiz: List of quiz questions
-    """
+def run_quiz(questions, username, users):
     score = 0
-    for question in quiz:
-        if ask_question(question):
-            score += 1
+    fifty_fifty_available = True
     
-    print(f"You've completed the quiz! Your final score is {score}/{len(quiz)}.")
+    for question in questions:
+        correct, fifty_fifty_available = ask_question(question, fifty_fifty_available)
+        if correct:
+            score += 1
+            print("Correct!")
+        else:
+            print(f"Incorrect. The correct answer was '{question['answer'].upper()}'.")
+        print(f"Explanation: {question['explanation']}\n")
+    
+    print(f"Quiz complete! Your score: {score}/{len(questions)}")
+    
+    if score > users[username]['high_score']:
+        users[username]['high_score'] = score
+        print(f"New personal high score: {score}")
+    
+    champion = max(users, key=lambda u: users[u]['high_score'])
+    print(f"Current champion: {champion} with a score of {users[champion]['high_score']}")
+    
+    save_data(users, USER_DATA_FILE)
 
 if __name__ == "__main__":
-    filename = 'quiz_questions.txt'  # Replace with correct path if needed
-    quiz_data = load_quiz(filename)
-    run_quiz(quiz_data)
+    users = load_data(USER_DATA_FILE)
+    questions = [parse_question(block) for block in load_data(QUIZ_FILE)]
+    username = get_username(users)
+    run_quiz(questions, username, users)
