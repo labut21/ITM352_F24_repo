@@ -1,6 +1,7 @@
 import pandas as pd
 import pyarrow # not needed, but it's a good practice to import it
 import time
+import sys
 
 # The file at this URL contains a large data set. It must be downloadable and in CSV format to be read by pandas.
 url = "https://drive.google.com/uc?id=1ujY0WCcePdotG2xdbLyeECFW9lCJ4t-K"
@@ -61,13 +62,39 @@ def display_initial_rows(data):
         except ValueError:
             print("Invalid input. Please enter a valid number, 'all', or leave empty to skip.")
 
+def exit_program(data):
+    sys.exit(0)
+
+def sales_by_region_order_type(data):
+    print(data)
+
+def display_menu(data):
+    menu_options = (
+   ("Show the first n rows of sales data", display_initial_rows),
+   ("Show the number of employees by region", sales_by_region_order_type),
+   ("Exit the program", exit_program)
+)
+
+    print("\nAvailable Actions:")
+    for index, (description, _) in enumerate(menu_options):
+        print(f"{index + 1}. {description}")
+    
+    try:
+        choice = int(input("Select an option (1 to {}): ".format(len(menu_options))))
+        if 1 <= choice <= len(menu_options):
+            action = menu_options[choice - 1][1]
+            action(data)  # Call the selected function
+        else:
+            print("Invalid choice. Please select a number from the menu.")
+    except ValueError:
+        print("Invalid input. Please enter a number.")
 
 # main
 sales_data = load_csv(test_data_file)
 # main loop
 def main():
     while(True):
-        display_initial_rows(sales_data)
+        display_menu(sales_data)
 
 if  (__name__ == "__main__"):
     main()

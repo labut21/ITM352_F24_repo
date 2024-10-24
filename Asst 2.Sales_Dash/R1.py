@@ -1,84 +1,76 @@
 import pandas as pd
 import time
 
-# Load sales data from a local file
+# Load sales data
 def load_data(file_path):
     """
-    Load sales data from a specified CSV file.
+    Load sales data from CSV and fill missing values.
     
-    Parameters:
+    Args:
     file_path (str): Path to the CSV file.
 
     Returns:
-    pd.DataFrame: DataFrame containing the sales data, or None if loading fails.
+    pd.DataFrame: Loaded DataFrame or None if loading fails.
     """
     try:
-        start_time = time.time()  # Start the timer for loading
-        df = pd.read_csv(file_path).fillna(0)  # Load CSV and fill missing values with 0
+        start_time = time.time()
+        df = pd.read_csv(file_path).fillna(0)
         print(f"File loaded in {time.time() - start_time:.2f} seconds. Rows: {df.shape[0]}, Columns: {df.shape[1]}")
-        print(f"Available columns: {list(df.columns)}")
-
-        # Check for required columns
-        required = ['Region', 'Employee', 'Product', 'Customer', 'Sales Amount']
-        missing = [col for col in required if col not in df.columns]
-        if missing:
-            print(f"Warning: Missing columns: {missing}. Some analytics may not work.")
         return df
     except Exception as e:
         print(f"Error loading data: {e}")
         return None
 
-# Predefined analyses
+# Filter data by date range
+def filter_date_range(df):
+    """
+    Filter data by user-provided date range.
 
-def total_sales_by_region(df):
-    """
-    Print total sales aggregated by region.
-    
-    Parameters:
-    df (pd.DataFrame): DataFrame containing sales data.
-    """
-    print(pd.pivot_table(df, values='Sales Amount', index='Region', aggfunc='sum'))
+    Args:
+    df (pd.DataFrame): DataFrame to filter.
 
-def employee_performance(df):
-    """
-    Print employee performance based on total sales.
-    
-    Parameters:
-    df (pd.DataFrame): DataFrame containing sales data.
-    """
-    print(pd.pivot_table(df, values='Sales Amount', index='Employee', aggfunc='sum'))
-
-# Custom pivot table
-def custom_pivot_table(df):
-    """
-    Create a custom pivot table based on user input.
-    
-    Parameters:
-    df (pd.DataFrame): DataFrame containing sales data.
+    Returns:
+    pd.DataFrame: Filtered DataFrame.
     """
     try:
-        rows = input("Row (e.g., Region): ")
-        values = input("Values (e.g., Sales Amount): ")
-        aggfunc = input("Aggregation (sum, mean, etc.): ")
+        start_date = input("Start date (YYYY-MM-DD) or press Enter for no filter: ")
+        end_date = input("End date (YYYY-MM-DD) or press Enter for no filter: ")
+        if start_date and end_date:
+            df['order_date'] = pd.to_datetime(df['order_date'])
+            df = df[(df['order_date'] >= start_date) & (df['order_date'] <= end_date)]
+            print(f"Filtered to {df.shape[0]} rows.")
+        return df
+    except Exception as e:
+        print(f"Error filtering by date: {e}")
+        return df
+
+# Predefined analyses
+def total_sales_by_region(df):
+    """Display total sales by region."""
+    print(pd.pivot_table(df, values='unit_price', index='sales_region', aggfunc='sum'))
+
+def custom_pivot(df):
+    """Create a custom pivot table based on user input."""
+    try:
+        rows = input("Rows (e.g., 'sales_region'): ").split(',')
+        values = input("Values (e.g., 'unit_price'): ").split(',')
+        aggfunc = input("Aggregation (e.g., 'sum'): ")
         print(pd.pivot_table(df, values=values, index=rows, aggfunc=aggfunc))
     except Exception as e:
         print(f"Error: {e}")
 
 # Dashboard menu
 def dashboard(df):
-    """
-    Display a dashboard menu for sales analyses.
+    """Display analysis options."""
+    options = {'1': total_sales_by_region, '2': custom_pivot}
     
-    Parameters:
-    df (pd.DataFrame): DataFrame containing sales data.
-    """
-    options = {'1': total_sales_by_region, '2': employee_performance, '3': custom_pivot_table}
     while True:
-        choice = input("\n1. Total Sales by Region\n2. Employee Performance\n3. Custom Pivot Table\n4. Exit\nChoose an option: ")
-        if choice == '4':
+        choice = input("\n1. Total Sales by Region\n2. Custom Pivot Table\n3. Exit\nSelect an option: ")
+        if choice == '3':
             break
         if choice in options:
-            options[choice](df)
+            df_filtered = filter_date_range(df)
+            options[choice](df_filtered)
 
 # Main function
 if __name__ == "__main__":
