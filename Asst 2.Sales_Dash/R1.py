@@ -82,7 +82,7 @@ def dashboard(df):
 
 # Main function
 if __name__ == "__main__":
-    file_path = "/Users/lanceabut/Downloads/sales_data.csv"  # Change this to your file path
+    file_path = "/Users/lanceabut/Downloads/sales_data.csv"
     df = load_data(file_path)
     if df is not None:
         dashboard(df)
