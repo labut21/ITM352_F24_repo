@@ -1,227 +1,124 @@
 import pandas as pd
-import numpy as np
 
 class SalesDashboard:
     def __init__(self, df):
         self.df = df
         self.total_rows = len(df)
-        self.menu_options = {
-            '1': ('Show first n rows', self.show_rows),
-            '2': ('Sales by region and order type', self.sales_by_region),
-            '3': ('Average sales by region and state', self.avg_sales),
-            '4': ('Sales by customer type', self.customer_sales),
-            '5': ('Sales by region and product', self.product_sales),
-            '6': ('Sales by customer type', self.customer_totals),
-            '7': ('Price range by category', self.price_range),
-            '8': ('Employees by region', self.employee_count),
-            '9': ('Custom pivot table', self.custom_pivot),
-            '10': ('Exit', exit)
+        self.menu = {
+            '1': ('Preview data', self.preview_data),
+            '2': ('Region sales', self.region_sales),
+            '3': ('State averages', self.state_averages),
+            '4': ('Customer analysis', self.customer_analysis),
+            '5': ('Product analysis', self.product_analysis),
+            '6': ('Customer totals', self.customer_totals),
+            '7': ('Price analysis', self.price_analysis),
+            '8': ('Employee count', self.employee_count),
+            '9': ('Exit', exit)
         }
 
-    def show_rows(self):
-        """Display first n rows of data with input validation"""
-        print(f"\nTotal available rows: {self.total_rows}")
-        print("Enter rows to display:")
-        print(f"- Enter a number 1 to {self.total_rows}")
-        print("- To see all rows, enter 'all'")
-        print("- To skip preview, press Enter")
+    def preview_data(self):
+        print(f"\nTotal rows: {self.total_rows}")
+        rows = input("Enter number of rows (or 'all'): ").lower()
         
-        user_input = input("Your choice: ").strip().lower()
-        
-        if not user_input:
-            print("Preview skipped")
-            return
-            
-        if user_input == 'all':
-            print("\nDisplaying all rows:")
+        if rows == 'all':
             print(self.df)
-            return
-            
-        try:
-            n = int(user_input)
-            if 1 <= n <= self.total_rows:
-                print(f"\nDisplaying first {n} rows:")
-                print(self.df.head(n))
-            else:
-                print(f"Please enter a number between 1 and {self.total_rows}")
-        except ValueError:
-            print("Invalid input. Please enter a number or 'all'")
+        elif rows.isdigit() and 0 < int(rows) <= self.total_rows:
+            print(self.df.head(int(rows)))
+        else:
+            print("Invalid input")
 
-    def sales_by_region(self):
-        """Sales analysis by region and order type"""
+    def region_sales(self):
         result = pd.pivot_table(
             self.df,
             values='unit_price',
             index='sales_region',
             columns='order_type',
-            aggfunc='sum',
-            fill_value=0
+            aggfunc='sum'
         )
-        result.loc['Total'] = result.sum()
-        
-        print("\nTotal Sales by Region and Order Type:")
-        print("=====================================")
+        print("\nSales by Region:")
         print(result.round(2))
-        print(f"\nGrand Total: ${result.values.sum():,.2f}")
 
-    def avg_sales(self):
-        """Average sales by region, state and order type"""
+    def state_averages(self):
         result = pd.pivot_table(
             self.df,
             values='unit_price',
             index=['sales_region', 'customer_state'],
             columns='order_type',
-            aggfunc='mean',
-            fill_value=0
+            aggfunc='mean'
         )
-        
-        print("\nAverage Sales by Region, State, and Order Type:")
-        print("============================================")
+        print("\nAverage Sales by State:")
         print(result.round(2))
-        
-        # Add regional averages
-        regional_avg = pd.pivot_table(
-            self.df,
-            values='unit_price',
-            index=['sales_region'],
-            columns='order_type',
-            aggfunc='mean',
-            fill_value=0
-        )
-        print("\nRegional Averages:")
-        print("================")
-        print(regional_avg.round(2))
 
-    def customer_sales(self):
-        """Sales by customer type, order type and state"""
+    def customer_analysis(self):
         result = pd.pivot_table(
             self.df,
             values='unit_price',
             index=['customer_type', 'order_type'],
             columns='customer_state',
-            aggfunc='sum',
-            fill_value=0
+            aggfunc='sum'
         )
-        
-        print("\nSales by Customer Type, Order Type and State:")
-        print("=========================================")
+        print("\nCustomer Sales by State:")
         print(result.round(2))
-        print(f"\nTotal Sales: ${result.values.sum():,.2f}")
 
-    def product_sales(self):
-        """Sales quantity and price by region and product"""
+    def product_analysis(self):
         result = pd.pivot_table(
             self.df,
             values=['quantity', 'unit_price'],
             index=['sales_region', 'product_category'],
-            aggfunc={'quantity': 'sum', 'unit_price': 'sum'},
-            fill_value=0
+            aggfunc='sum'
         )
-        
-        # Rename columns for clarity
-        result.columns = ['Total Quantity', 'Total Sales ($)']
-        
-        print("\nQuantity and Sales by Region and Product:")
-        print("=====================================")
+        print("\nProduct Sales by Region:")
         print(result.round(2))
-        print(f"\nTotal Quantity: {result['Total Quantity'].sum():,.0f}")
-        print(f"Total Sales: ${result['Total Sales ($)'].sum():,.2f}")
 
     def customer_totals(self):
-        """Sales quantity and price by customer type"""
         result = pd.pivot_table(
             self.df,
             values=['quantity', 'unit_price'],
             index=['customer_type', 'order_type'],
-            aggfunc={'quantity': 'sum', 'unit_price': 'sum'},
-            fill_value=0
+            aggfunc='sum'
         )
-        
-        # Rename columns for clarity
-        result.columns = ['Total Quantity', 'Total Sales ($)']
-        
-        print("\nQuantity and Sales by Customer Type:")
-        print("================================")
+        print("\nCustomer Sales Summary:")
         print(result.round(2))
-        print(f"\nTotal Quantity: {result['Total Quantity'].sum():,.0f}")
-        print(f"Total Sales: ${result['Total Sales ($)'].sum():,.2f}")
 
-    def price_range(self):
-        """Price range by product category"""
+    def price_analysis(self):
         result = pd.pivot_table(
             self.df,
             values='unit_price',
             index='product_category',
-            aggfunc=['min', 'max', 'mean'],
-            fill_value=0
+            aggfunc=['min', 'max', 'mean']
         )
-        
-        # Rename columns for clarity
-        result.columns = ['Min Price ($)', 'Max Price ($)', 'Avg Price ($)']
-        
-        print("\nPrice Range by Product Category:")
-        print("============================")
+        print("\nPrice Analysis:")
         print(result.round(2))
 
     def employee_count(self):
-        """Unique employees by region"""
         result = pd.pivot_table(
             self.df,
             values='employee_name',
             index='sales_region',
-            aggfunc='nunique',
-            fill_value=0
+            aggfunc='nunique'
         )
-        
-        result.columns = ['Employee Count']
-        
-        print("\nUnique Employees by Region:")
-        print("========================")
+        print("\nEmployees per Region:")
         print(result)
-        print(f"\nTotal Unique Employees: {result['Employee Count'].sum():,.0f}")
-
-    def custom_pivot(self):
-        """Custom pivot table analysis"""
-        try:
-            print("\nAvailable columns:", ', '.join(self.df.columns))
-            rows = input("Enter row columns (comma-separated): ").split(',')
-            values = input("Enter value columns (comma-separated): ").split(',')
-            agg = input("Enter aggregation (sum, mean, count, min, max): ")
-            
-            result = pd.pivot_table(
-                self.df,
-                values=[v.strip() for v in values],
-                index=[r.strip() for r in rows],
-                aggfunc=agg,
-                fill_value=0
-            )
-            print("\nCustom Analysis Results:")
-            print("=====================")
-            print(result.round(2))
-        except Exception as e:
-            print(f"Error: {e}")
 
     def run(self):
         while True:
-            print("\n=== Sales Data Dashboard ===")
-            for key, (description, _) in self.menu_options.items():
-                print(f"{key}. {description}")
-                
-            choice = input("\nSelect option (1-10): ").strip()
+            print("\n=== Sales Dashboard ===")
+            for key, (name, _) in self.menu.items():
+                print(f"{key}: {name}")
             
-            if choice in self.menu_options:
+            choice = input("\nSelect option: ").strip()
+            if choice in self.menu:
                 try:
-                    self.menu_options[choice][1]()
+                    self.menu[choice][1]()
                 except Exception as e:
-                    print(f"Error processing request: {e}")
+                    print(f"Error: {e}")
             else:
-                print("Invalid option. Please select a number between 1 and 10.")
+                print("Invalid option")
 
 def main():
     try:
-        df = pd.read_csv("sales_data.csv")
-        dashboard = SalesDashboard(df)
-        dashboard.run()
+        df = pd.read_csv("/Users/lanceabut/Downloads/sales_data.csv")
+        SalesDashboard(df).run()
     except Exception as e:
         print(f"Error loading data: {e}")
 
