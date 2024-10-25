@@ -1,100 +1,168 @@
 import pandas as pd
+from datetime import datetime
 
-# Path to sales data file
-file_path = "/Users/lanceabut/Downloads/sales_data.csv"
+class PivotGenerator:
+    def __init__(self, df):
+        self.df = df
+        self.df['order_date'] = pd.to_datetime(self.df['order_date'])
+        self.date_range = None
+        
+        self.fields = {
+            'rows': {
+                '1': 'employee_name',
+                '2': 'sales_region',
+                '3': 'product_category',
+                '4': 'customer_state'
+            },
+            'cols': {
+                '1': 'order_type',
+                '2': 'customer_type'
+            },
+            'vals': {
+                '1': 'quantity',
+                '2': 'unit_price'
+            },
+            'aggs': {
+                '1': 'sum',
+                '2': 'mean',
+                '3': 'count'
+            }
+        }
 
-def load_data(file_path):
-    """Load the CSV file, fill missing values, and process 'order_date'."""
-    try:
-        df = pd.read_csv(file_path).fillna(0)
-        print(f"Data loaded: {df.shape[0]} rows, {df.shape[1]} columns.")
-        if 'order_date' in df.columns:
-            df['order_date'] = pd.to_datetime(df['order_date'], errors='coerce')
+    def select_date_range(self):
+        min_date = self.df['order_date'].min()
+        max_date = self.df['order_date'].max()
+        
+        print("\n=== Date Range Selection ===")
+        print(f"Available date range: {min_date.date()} to {max_date.date()}")
+        print("Enter dates in YYYY-MM-DD format")
+        
+        while True:
+            try:
+                start_str = input("Start date: ")
+                end_str = input("End date: ")
+                
+                start_date = pd.to_datetime(start_str)
+                end_date = pd.to_datetime(end_str)
+                
+                if start_date > end_date:
+                    print("Start date must be before end date")
+                    continue
+                    
+                if start_date < min_date or end_date > max_date:
+                    print("Dates must be within available range")
+                    continue
+                    
+                self.date_range = (start_date, end_date)
+                filtered_records = len(self.df[(self.df['order_date'] >= start_date) & 
+                                             (self.df['order_date'] <= end_date)])
+                print(f"\nSelected {filtered_records} records from {start_date.date()} to {end_date.date()}")
+                break
+                
+            except ValueError:
+                print("Invalid date format. Use YYYY-MM-DD")
+
+    def get_selection(self, field_type, prompt, optional=False):
+        print(f"\n{prompt}")
+        for key, value in self.fields[field_type].items():
+            print(f"{key}: {value}")
+        
+        selection = input("Enter numbers (comma-separated): ").strip()
+        if optional and not selection:
+            return []
+            
+        choices = selection.split(',')
+        return [self.fields[field_type][c.strip()] 
+                for c in choices 
+                if c.strip() in self.fields[field_type]]
+
+    def calculate_totals(self, pivot, vals, cols):
+        print("\nTotals:")
+        if cols:
+            # For pivoted data with columns
+            for val in vals:
+                if isinstance(pivot, pd.DataFrame):
+                    # If multiple columns exist
+                    total = pivot[val].sum().sum()
+                else:
+                    # If only one column exists
+                    total = pivot.sum()
+                print(f"Total {val}: {total:,.2f}")
         else:
-            print("Warning: 'order_date' column not found.")
-        return df
+            # For non-pivoted data
+            if isinstance(pivot, pd.Series):
+                print(f"Total: {pivot.sum():,.2f}")
+            else:
+                for val in vals:
+                    print(f"Total {val}: {pivot[val].sum():,.2f}")
+
+    def generate(self):
+        try:
+            # Select date range first
+            self.select_date_range()
+            
+            # Filter data by date range
+            mask = ((self.df['order_date'] >= self.date_range[0]) & 
+                   (self.df['order_date'] <= self.date_range[1]))
+            filtered_df = self.df[mask]
+            
+            if len(filtered_df) == 0:
+                print("No data available for selected date range")
+                return
+            
+            # Get user selections
+            rows = self.get_selection('rows', "Select row fields:")
+            cols = self.get_selection('cols', "Select column fields (optional):", optional=True)
+            vals = self.get_selection('vals', "Select value fields:")
+            agg = self.get_selection('aggs', "Select aggregation:")[0]
+
+            # Create pivot table
+            pivot = pd.pivot_table(
+                filtered_df,
+                values=vals,
+                index=rows,
+                columns=cols if cols else None,
+                aggfunc=agg,
+                fill_value=0
+            )
+
+            # Display results
+            print(f"\n=== Results ({self.date_range[0].date()} to {self.date_range[1].date()}) ===")
+            print(pivot.round(2))
+
+            # Calculate and display totals
+            self.calculate_totals(pivot, vals, cols)
+
+            # Save option
+            if input("\nSave to CSV? (y/n): ").lower() == 'y':
+                name = input("Filename: ")
+                pivot.to_csv(f"{name}.csv")
+                print(f"Saved to {name}.csv")
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+def main():
+    try:
+        df = pd.read_csv("/Users/lanceabut/Downloads/sales_data.csv")
+        pivot_gen = PivotGenerator(df)
+        
+        while True:
+            print("\n=== Pivot Table Generator ===")
+            print("1: Generate pivot table")
+            print("2: Exit")
+            
+            choice = input("\nSelect option: ")
+            
+            if choice == '1':
+                pivot_gen.generate()
+            elif choice == '2':
+                break
+            else:
+                print("Invalid option")
+
     except Exception as e:
         print(f"Error loading data: {e}")
-        return None
-
-def safe_input(prompt):
-    """Safely get user input, ensuring it is a string."""
-    try:
-        return input(prompt).strip()
-    except (TypeError, AttributeError):
-        return ""
-
-def get_date_range(df):
-    """Filter data by user-specified date range."""
-    if 'order_date' not in df or df['order_date'].isnull().all():
-        return df
-    start = pd.to_datetime(safe_input(f"Start date (YYYY-MM-DD): ") or df['order_date'].min())
-    end = pd.to_datetime(safe_input(f"End date (YYYY-MM-DD): ") or df['order_date'].max())
-    return df[(df['order_date'] >= start) & (df['order_date'] <= end)]
-
-def show_first_n_rows(df):
-    """Show the first n rows of data."""
-    n = safe_input(f"Show how many rows (1-{df.shape[0]}, 'all', or Enter to skip): ")
-    if n.lower() == 'all':
-        print(df)
-    elif n.isdigit() and 1 <= int(n) <= df.shape[0]:
-        print(df.head(int(n)))
-    else:
-        print("Invalid or skipped input.")
-
-def create_pivot_table(df, rows, columns, values, aggfunc):
-    """Generate a pivot table."""
-    try:
-        pivot = pd.pivot_table(df, index=rows, columns=columns, values=values, aggfunc=aggfunc)
-        print(pivot)
-    except Exception as e:
-        print(f"Error creating pivot table: {e}")
-
-def select_options(prompt, options):
-    """Prompt user to select options."""
-    print(prompt)
-    for key, value in options.items():
-        print(f"{key}. {value}")
-    choices = safe_input("Select option(s): ")
-    if choices:
-        return [options[k.strip()] for k in choices.split(',') if k.strip() in options]
-    return []
-
-def custom_pivot_table(df):
-    """Create a custom pivot table."""
-    rows = select_options("Select rows:", {'1': 'employee_name', '2': 'sales_region', '3': 'product_category'})
-    cols = select_options("Select columns (optional):", {'1': 'order_type', '2': 'customer_type'}) or []
-    vals = select_options("Select values:", {'1': 'quantity', '2': 'sale_price'})
-    agg = select_options("Select aggregation function:", {'1': 'sum', '2': 'mean', '3': 'count'})
-    create_pivot_table(df, rows, cols, vals, agg)
-
-def dashboard(df):
-    """Interactive sales data dashboard menu."""
-    menu = {
-        '1': show_first_n_rows,
-        '2': lambda df: create_pivot_table(df, ['sales_region'], ['order_type'], 'sale_price', 'sum'),
-        '3': lambda df: create_pivot_table(df, ['sales_region'], ['state', 'sale_type'], 'sale_price', 'mean'),
-        '4': lambda df: create_pivot_table(df, ['state', 'customer_type'], ['order_type'], 'sale_price', 'sum'),
-        '5': lambda df: create_pivot_table(df, ['sales_region', 'product'], [], ['quantity', 'sale_price'], 'sum'),
-        '6': lambda df: create_pivot_table(df, ['customer_type'], ['order_type'], ['quantity', 'sale_price'], 'sum'),
-        '7': lambda df: create_pivot_table(df, ['product_category'], [], ['sale_price'], ['max', 'min']),
-        '8': lambda df: create_pivot_table(df, ['sales_region'], [], 'employee_name', pd.Series.nunique),
-        '9': custom_pivot_table,
-        '10': exit
-    }
-
-    while True:
-        print("\n--- Sales Data Dashboard ---")
-        for key, func in menu.items():
-            print(f"{key}. {func.__doc__.strip()}")
-        choice = safe_input("Choose an option: ")
-        if choice in menu:
-            filtered_df = get_date_range(df)
-            menu[choice](filtered_df)
-        else:
-            print("Invalid choice, try again.")
 
 if __name__ == "__main__":
-    df = load_data(file_path)
-    if df is not None:
-        dashboard(df)
+    main()
