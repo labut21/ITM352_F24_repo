@@ -54,6 +54,7 @@ class PivotGenerator:
                     continue
                     
                 self.date_range = (start_date, end_date)
+# This function was generated using ChatGPT with the prompt, "Write code to count and display the number of records inside a specified date range”
                 filtered_records = len(self.df[(self.df['order_date'] >= start_date) & 
                                              (self.df['order_date'] <= end_date)])
                 print(f"\nSelected {filtered_records} records from {start_date.date()} to {end_date.date()}")

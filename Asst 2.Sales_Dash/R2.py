@@ -1,6 +1,8 @@
 import pandas as pd
 
 class SalesDashboard:
+# This function was generated using ChatGPT with the prompt, "How to allow users to interact with the data through a command-line interface"
+# Sales data dashboard for interactive analysis
     def __init__(self, df):
         self.df = df
         self.menu_options = {

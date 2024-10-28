@@ -3,15 +3,10 @@ import time
 
 # Load sales data
 def load_data(file_path):
-    """
-    Load sales data from CSV and fill missing values.
-    
-    Args:
-    file_path (str): Path to the CSV file.
+# Load sales data from CSV and fill missing values
 
-    Returns:
-    pd.DataFrame: Loaded DataFrame or None if loading fails.
-    """
+# Returns loaded DataFrame or nothing if loading fails
+
     try:
         start_time = time.time()
         df = pd.read_csv(file_path).fillna(0)
@@ -23,15 +18,8 @@ def load_data(file_path):
 
 # Filter data by date range
 def filter_date_range(df):
-    """
-    Filter data by user-provided date range.
+# Sort data by the provided date range
 
-    Args:
-    df (pd.DataFrame): DataFrame to filter.
-
-    Returns:
-    pd.DataFrame: Filtered DataFrame.
-    """
     try:
         start_date = input("Start date (YYYY-MM-DD) or press Enter for no filter: ")
         end_date = input("End date (YYYY-MM-DD) or press Enter for no filter: ")
@@ -46,11 +34,11 @@ def filter_date_range(df):
 
 # Predefined analyses
 def total_sales_by_region(df):
-    """Display total sales by region."""
+# Show total sales by region
     print(pd.pivot_table(df, values='unit_price', index='sales_region', aggfunc='sum'))
 
 def custom_pivot(df):
-    """Create a custom pivot table based on user input."""
+# Create a custom pivot table based on user input
     try:
         rows = input("Rows (e.g., 'sales_region'): ").split(',')
         values = input("Values (e.g., 'unit_price'): ").split(',')
@@ -61,7 +49,7 @@ def custom_pivot(df):
 
 # Dashboard menu
 def dashboard(df):
-    """Display analysis options."""
+# Show analysis options
     options = {'1': total_sales_by_region, '2': custom_pivot}
     
     while True:

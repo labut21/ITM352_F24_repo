@@ -3,6 +3,7 @@ import pandas as pd
 class PivotGenerator:
     def __init__(self, df):
         self.df = df
+# This function was generated using ChatGPT with the prompt, "Create rows, columns, values, and aggregations"
         self.fields = {
             'rows': {
                 '1': 'employee_name',
