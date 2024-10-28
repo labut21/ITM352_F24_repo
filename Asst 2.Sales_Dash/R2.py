@@ -19,6 +19,7 @@ class SalesDashboard:
         }
 
     def show_rows(self):
+# Show the first n rows of the sales data
         try:
             n = int(input("Number of rows to display: "))
             print(self.df.head(n))
@@ -26,6 +27,7 @@ class SalesDashboard:
             print("Please enter a valid number")
 
     def sales_by_region(self):
+# Show total sales by region and order_type
         result = pd.pivot_table(
             self.df,
             values='unit_price',
@@ -36,6 +38,7 @@ class SalesDashboard:
         print(result)
 
     def avg_sales(self):
+# Show average sales by region, state, and sale type
         result = pd.pivot_table(
             self.df,
             values='unit_price',
@@ -46,6 +49,7 @@ class SalesDashboard:
         print(result)
 
     def customer_sales(self):
+# Show sales by customer type and order type by state
         result = pd.pivot_table(
             self.df,
             values='unit_price',
@@ -56,6 +60,7 @@ class SalesDashboard:
         print(result)
 
     def product_sales(self):
+# Show sales quantity and price by region and product category
         result = pd.pivot_table(
             self.df,
             values=['quantity', 'unit_price'],
@@ -66,6 +71,7 @@ class SalesDashboard:
         print(result)
 
     def customer_totals(self):
+# Show total sales quantity and price by customer type
         result = pd.pivot_table(
             self.df,
             values=['quantity', 'unit_price'],
@@ -76,6 +82,7 @@ class SalesDashboard:
         print(result)
 
     def price_range(self):
+# Show the max and min sales price of sales by category
         result = pd.pivot_table(
             self.df,
             values='unit_price',
@@ -86,6 +93,7 @@ class SalesDashboard:
         print(result)
 
     def employee_count(self):
+# Showthe number of unique employees by region
         result = pd.pivot_table(
             self.df,
             values='employee_name',
@@ -122,14 +130,14 @@ class SalesDashboard:
             choice = input("\nSelect option (1-10): ").strip()
             
             if choice in self.menu_options:
-                self.menu_options[choice][1]()
+                self.menu_options[choice][1]() # Call the matching function
             else:
                 print("Invalid option")
 
 def main():
     try:
         df = pd.read_csv("/Users/lanceabut/Downloads/sales_data.csv")
-        dashboard = SalesDashboard(df)
+        dashboard = SalesDashboard(df) # Start the dashboard with data
         dashboard.run()
     except Exception as e:
         print(f"Error loading data: {e}")

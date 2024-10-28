@@ -1,7 +1,6 @@
 import pandas as pd
 import time
 
-# Load sales data
 def load_data(file_path):
 # Load sales data from CSV and fill missing values
 
@@ -16,7 +15,6 @@ def load_data(file_path):
         print(f"Error loading data: {e}")
         return None
 
-# Filter data by date range
 def filter_date_range(df):
 # Sort data by the provided date range
 
@@ -32,7 +30,6 @@ def filter_date_range(df):
         print(f"Error filtering by date: {e}")
         return df
 
-# Predefined analyses
 def total_sales_by_region(df):
 # Show total sales by region
     print(pd.pivot_table(df, values='unit_price', index='sales_region', aggfunc='sum'))
@@ -60,7 +57,6 @@ def dashboard(df):
             df_filtered = filter_date_range(df)
             options[choice](df_filtered)
 
-# Main function
 if __name__ == "__main__":
     file_path = "/Users/lanceabut/Downloads/sales_data.csv"
     df = load_data(file_path)

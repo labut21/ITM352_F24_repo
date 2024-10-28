@@ -2,6 +2,7 @@ import pandas as pd
 
 class PivotGenerator:
     def __init__(self, df):
+# Starts the PivotGenerator with a DataFrame and a dictionary of chooseable fields
         self.df = df
 # This function was generated using ChatGPT with the prompt, "Create rows, columns, values, and aggregations"
         self.fields = {
@@ -27,6 +28,7 @@ class PivotGenerator:
         }
 
     def get_selection(self, field_type, prompt, optional=False):
+# Show selection options and gather user input
         print(f"\n{prompt}")
         for key, value in self.fields[field_type].items():
             print(f"{key}: {value}")
@@ -58,7 +60,7 @@ class PivotGenerator:
                 fill_value=0
             )
 
-            # Display results
+            # Show results
             print("\n=== Results ===")
             print(pivot.round(2))
 
@@ -81,7 +83,8 @@ def main():
     try:
         df = pd.read_csv("/Users/lanceabut/Downloads/sales_data.csv")
         pivot_gen = PivotGenerator(df)
-        
+    
+    # Menu to let users interact with the pivot generator
         while True:
             print("\n=== Pivot Table Generator ===")
             print("1: Generate pivot table")

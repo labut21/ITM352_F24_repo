@@ -4,7 +4,7 @@ from datetime import datetime
 class PivotGenerator:
     def __init__(self, df):
         self.df = df
-        self.df['order_date'] = pd.to_datetime(self.df['order_date'])
+        self.df['order_date'] = pd.to_datetime(self.df['order_date']) # Convert order_date to datetime format
         self.date_range = None
         self.saved_pivots = {}  # Stores saved pivot tables
 
@@ -22,6 +22,7 @@ class PivotGenerator:
         while True:
             try:
                 start_date, end_date = pd.to_datetime(input("Start date (YYYY-MM-DD): ")), pd.to_datetime(input("End date (YYYY-MM-DD): "))
+# Check selected dates
                 if start_date <= end_date and min_date <= start_date <= max_date and min_date <= end_date <= max_date:
                     self.date_range = (start_date, end_date)
                     filtered_records = len(self.df[(self.df['order_date'] >= start_date) & (self.df['order_date'] <= end_date)])
@@ -44,13 +45,16 @@ class PivotGenerator:
     def calculate_totals(self, pivot, vals, cols):
         print("\nTotals:")
         if cols:
+# Total across columns and rows
             for val in vals:
                 print(f"Total {val}: {pivot[val].sum().sum() if isinstance(pivot, pd.DataFrame) else pivot.sum():,.2f}")
         else:
+# Total for pivot tables without columns
             for val in (vals if isinstance(pivot, pd.DataFrame) else [pivot]):
                 print(f"Total {val}: {val.sum() if isinstance(val, pd.Series) else pivot[val].sum():,.2f}")
 
     def generate(self):
+# Shows and optionally saves the generated table
         self.select_date_range()
         mask = (self.df['order_date'] >= self.date_range[0]) & (self.df['order_date'] <= self.date_range[1])
         filtered_df = self.df[mask]
@@ -63,7 +67,8 @@ class PivotGenerator:
         cols = self.get_selection('cols', "Select column fields (optional):", optional=True)
         vals = self.get_selection('vals', "Select value fields:")
         agg = self.get_selection('aggs', "Select aggregation:")[0]
-        
+
+# Create the pivot table
         pivot = pd.pivot_table(filtered_df, values=vals, index=rows, columns=cols or None, aggfunc=agg, fill_value=0)
         print(f"\n=== Results ({self.date_range[0].date()} to {self.date_range[1].date()}) ===\n{pivot.round(2)}")
         self.calculate_totals(pivot, vals, cols)

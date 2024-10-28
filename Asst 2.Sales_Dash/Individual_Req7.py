@@ -4,8 +4,9 @@ from datetime import datetime
 class PivotGenerator:
     def __init__(self, df):
         self.df = df
+# Convert 'order_date' column to datetime format
         self.df['order_date'] = pd.to_datetime(self.df['order_date'])
-        self.date_range = None
+        self.date_range = None # Start data range for filtering
         
         self.fields = {
             'rows': {
@@ -30,6 +31,8 @@ class PivotGenerator:
         }
 
     def select_date_range(self):
+# Asks the user to choose a date range for filtering data in the DataFrame
+# Make sure dates are inside the available data range
         min_date = self.df['order_date'].min()
         max_date = self.df['order_date'].max()
         
@@ -90,7 +93,7 @@ class PivotGenerator:
                     total = pivot.sum()
                 print(f"Total {val}: {total:,.2f}")
         else:
-            # For non-pivoted data
+            # For data that is not pivoted
             if isinstance(pivot, pd.Series):
                 print(f"Total: {pivot.sum():,.2f}")
             else:
@@ -99,7 +102,7 @@ class PivotGenerator:
 
     def generate(self):
         try:
-            # Select date range first
+            # Choose date range first
             self.select_date_range()
             
             # Filter data by date range
@@ -127,11 +130,11 @@ class PivotGenerator:
                 fill_value=0
             )
 
-            # Display results
+            # Show results
             print(f"\n=== Results ({self.date_range[0].date()} to {self.date_range[1].date()}) ===")
             print(pivot.round(2))
 
-            # Calculate and display totals
+            # Calculate and show totals
             self.calculate_totals(pivot, vals, cols)
 
             # Save option

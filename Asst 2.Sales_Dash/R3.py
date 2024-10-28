@@ -28,6 +28,7 @@ class SalesDashboard:
             print("Invalid input")
 
     def region_sales(self):
+# Show total sales by region, divide by order_type (Retail/Wholesale)
         result = pd.pivot_table(
             self.df,
             values='unit_price',
@@ -39,6 +40,7 @@ class SalesDashboard:
         print(result.round(2))
 
     def state_averages(self):
+# Show average sales by region with average sales by state and sale type
         result = pd.pivot_table(
             self.df,
             values='unit_price',
@@ -50,6 +52,7 @@ class SalesDashboard:
         print(result.round(2))
 
     def customer_analysis(self):
+# Show sales summary by customer type and order type, grouped by state
         result = pd.pivot_table(
             self.df,
             values='unit_price',
@@ -61,6 +64,7 @@ class SalesDashboard:
         print(result.round(2))
 
     def product_analysis(self):
+# Show total quantity and sales price by region and product category
         result = pd.pivot_table(
             self.df,
             values=['quantity', 'unit_price'],
@@ -71,6 +75,7 @@ class SalesDashboard:
         print(result.round(2))
 
     def customer_totals(self):
+# Show total quantity and sales price by customer type and order type
         result = pd.pivot_table(
             self.df,
             values=['quantity', 'unit_price'],
@@ -81,6 +86,7 @@ class SalesDashboard:
         print(result.round(2))
 
     def price_analysis(self):
+# Show minimum, maximum, and average sales price by product category
         result = pd.pivot_table(
             self.df,
             values='unit_price',
@@ -91,6 +97,7 @@ class SalesDashboard:
         print(result.round(2))
 
     def employee_count(self):
+# Show the number of unique employees by region
         result = pd.pivot_table(
             self.df,
             values='employee_name',
@@ -101,6 +108,7 @@ class SalesDashboard:
         print(result)
 
     def run(self):
+# Show the dashboard menu and manage user inputs
         while True:
             print("\n=== Sales Dashboard ===")
             for key, (name, _) in self.menu.items():
