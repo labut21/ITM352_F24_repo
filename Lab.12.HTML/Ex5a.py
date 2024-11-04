@@ -1,16 +1,11 @@
 import requests
 
+# Define the URL
 url = "https://data.cityofchicago.org/resource/97wa-y6ff.json?$select=driver_type,count(license)&$group=driver_type"
 
+# Send GET request
 response = requests.get(url)
+data = response.json()  # Convert the response to JSON
 
-if response.status_code == 200:
-
-    records = requests.get(url)
-
-if response.status_code == 200:
-
-    records = response.json()
-    print(records)
-else:
-    print(f"Error: {response.status_code} - {response.text}")
+# Print the response data
+print(data)
