@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='quiz.js') }}"></script>
+</head>
+<body>
+    <div class="question-container">
+        <h2 id="question">Loading...</h2>
+        <div id="options" class="options">
+            <!-- Options will be dynamically added here -->
+        </div>
+        <div id="explanation" class="explanation"></div>
+    </div>
+</body>
+</html>
