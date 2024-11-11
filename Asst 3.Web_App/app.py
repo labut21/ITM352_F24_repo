@@ -7,12 +7,12 @@ app.secret_key = 'supersecretkey'  # Replace with a secure key
 
 # Paths for user data and quiz questions
 USER_DATA_FILE = 'user_data.json'
-QUIZ_FILE = 'quiz_questions.txt'
+QUIZ_FILE = 'questions.json'
 
 # Load data functions (same as your code)
 def load_data(filename):
     with open(filename, 'r') as file:
-        return json.load(file) if filename.endswith('.json') else file.read().split('---')
+        return json.load(file) # Directly load JSON data
 
 def save_data(data, filename):
     with open(filename, 'w') as file:
@@ -29,7 +29,7 @@ def parse_question(block):
 
 # Load users and questions on app startup
 users = load_data(USER_DATA_FILE)
-questions = [parse_question(block) for block in load_data(QUIZ_FILE)]
+questions = load_data(QUIZ_FILE)  # No need to parse each question block
 
 @app.route('/')
 def index():

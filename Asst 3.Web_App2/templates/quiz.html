@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Quiz</title>
+    <style>
+        /* Clean, minimal styling */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .question {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        .option {
+            display: block;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: #f5f5f5;
+        }
+
+        .correct {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .incorrect {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .explanation {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="score" id="score">Score: 0/5</div>
+        <div id="quiz"></div>
+    </div>
+
+    <script>
+        // Quiz data
+        const quizData = [
+            {
+                question: "What is Pau Hana?",
+                options: ["A type of fish", "The end of the workday", "A Hawaiian chant", "A luau dish"],
+                correct: 1,
+                explanation: "Pau hana means 'end of work' - it's the time after work for socializing and relaxing."
+            },
+            {
+                question: "What is the Hawaiian word for 'responsibility' or 'privilege'?",
+                options: ["Kuleana", "Mana", "Pono", "Aina"],
+                correct: 0,
+                explanation: "Kuleana means both privilege and responsibility in Hawaiian culture."
+            },
+            {
+                question: "What is the term for a native Hawaiian story or legend?",
+                options: ["Mele", "Moʻolelo", "Hula", "Kahuna"],
+                correct: 1,
+                explanation: "Moʻolelo refers to Hawaiian stories, traditions, and history passed down through generations."
+            },
+            {
+                question: "What is a Kahuna?",
+                options: ["Leader of a hula group", "A Hawaiian shaman or priest", "A type of canoe", "A Hawaiian mountain"],
+                correct: 1,
+                explanation: "A Kahuna is a Hawaiian priest or expert, often serving as a spiritual leader or healer."
+            },
+            {
+                question: "What does 'E komo mai' mean?",
+                options: ["Goodbye", "Welcome", "Come back soon", "Blessings"],
+                correct: 1,
+                explanation: "E komo mai means 'welcome' and is used as an invitation to enter or join."
+            }
+        ];
+
+        // Quiz state
+        let score = 0;
+        const scoreDisplay = document.getElementById('score');
+        const quizContainer = document.getElementById('quiz');
+
+        // Create quiz
+        function createQuiz() {
+            quizData.forEach((questionData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                
+                questionDiv.innerHTML = `
+                    <h2>Question ${index + 1}: ${questionData.question}</h2>
+                    ${questionData.options.map((option, optionIndex) => `
+                        <button class="option" onclick="checkAnswer(${index}, ${optionIndex})">
+                            ${option}
+                        </button>
+                    `).join('')}
+                    <div class="explanation">${questionData.explanation}</div>
+                `;
+                
+                quizContainer.appendChild(questionDiv);
+            });
+        }
+
+        // Check answer
+        function checkAnswer(questionIndex, selectedOption) {
+            const questionDiv = document.querySelectorAll('.question')[questionIndex];
+            const options = questionDiv.querySelectorAll('.option');
+            const explanation = questionDiv.querySelector('.explanation');
+            
+            // Prevent multiple answers
+            if (options[0].disabled) return;
+            
+            // Disable all options after answer
+            options.forEach(option => option.disabled = true);
+            
+            // Check if correct
+            if (selectedOption === quizData[questionIndex].correct) {
+                options[selectedOption].classList.add('correct');
+                score++;
+            } else {
+                options[selectedOption].classList.add('incorrect');
+                options[quizData[questionIndex].correct].classList.add('correct');
+            }
+            
+            // Show explanation
+            explanation.style.display = 'block';
+            
+            // Update score
+            scoreDisplay.textContent = `Score: ${score}/${quizData.length}`;
+        }
+
+        // Initialize quiz
+        createQuiz();
+    </script>
+</body>
+</html>

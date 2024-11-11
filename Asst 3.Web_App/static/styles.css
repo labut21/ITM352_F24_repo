@@ -1,0 +1,34 @@
+/* Correct Answer */
+.correct-answer {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Incorrect Answer with shake animation */
+.incorrect-answer {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    transition: background-color 0.3s ease;
+    animation: shake 0.3s;
+}
+
+/* Explanation Fade-In */
+.explanation {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #6c757d;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+/* Shake Animation */
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
