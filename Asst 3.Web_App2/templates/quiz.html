@@ -209,6 +209,7 @@
             const options = questionCard.querySelectorAll('.option-btn');
             const explanation = questionCard.querySelector('.explanation');
 // Blocks making multiple selections for the same question
+// This function was generated using ChatGPT with the prompt, "Makes sure each question can only be answered once by blocking all options once an answer is selected to avoid multiple selections."
             if (options[0].disabled) return;
             options.forEach(option => option.disabled = true);
             answeredQuestions++;

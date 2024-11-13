@@ -35,6 +35,7 @@ button:hover {
 }
 
 /* Correct/incorrect feedback styles */
+/* This CSS was generated using ChatGPT with the prompt, "Style CSS classes to emphasize correct and incorrect answers in a quiz app, with background color and animations."  */
 .correct {
     background-color: #28a745;
     color: white;
