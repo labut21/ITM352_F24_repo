@@ -13,4 +13,4 @@ def quiz():
     return render_template('quiz.html', questions=questions)
 
 if __name__ == '__main__':
-    app.run(debug=True) Thursday I want
+    app.run(debug=True)

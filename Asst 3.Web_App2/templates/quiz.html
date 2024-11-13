@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hawaiian Cultural Quiz</title>
+// Bootstrap for design and layout
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+
+// This CSS block was generated using ChatGPT with the prompt, "Create quiz app with a Hawaiian theme that has mobile friendly designs, hover effects, and elements for main and secondary colors."
     <style>
         :root {
             --primary-color: #4CAF50;
@@ -117,7 +120,7 @@
             <span class="badge bg-primary score-badge" id="score">Score: 0/5</span>
             <span class="badge bg-secondary score-badge" id="question-counter">Question: 1/5</span>
         </div>
-
+// Main quiz area where questions are automatically added
         <div id="quiz"></div>
 
         <div id="quiz-summary" class="card text-center d-none">
@@ -142,7 +145,7 @@
             { question: "What does 'E komo mai' mean?", options: ["Goodbye", "Welcome", "Come back soon", "Blessings"], correct: 1, explanation: "'E komo mai' means 'welcome' or 'come in' in Hawaiian." }
         ];
 
-        let score = 0;
+        let score = 0; // Tracks user's score
         let currentQuestion = 0;
         let answeredQuestions = 0;
 
@@ -151,11 +154,11 @@
             document.getElementById('progress').style.width = `${progress}%`;
             document.getElementById('question-counter').textContent = `Question: ${currentQuestion + 1}/${quizData.length}`;
         }
-
+// Creates and shows quiz questions quickly on the page
         function createQuiz() {
             const quizContainer = document.getElementById('quiz');
             quizContainer.innerHTML = '';
-
+// Makes each question and its options as hidden, showed one at a time
             quizData.forEach((questionData, index) => {
                 const questionCard = document.createElement('div');
                 questionCard.className = 'card question-card mb-4';
@@ -205,7 +208,7 @@
             const questionCard = document.querySelectorAll('.question-card')[questionIndex];
             const options = questionCard.querySelectorAll('.option-btn');
             const explanation = questionCard.querySelector('.explanation');
-            
+// Blocks making multiple selections for the same question
             if (options[0].disabled) return;
             options.forEach(option => option.disabled = true);
             answeredQuestions++;
@@ -218,7 +221,7 @@
             } else {
                 options[selectedOption].classList.add('incorrect');
                 options[quizData[questionIndex].correct].classList.add('correct');
-                explanation.style.display = 'block'; // Show explanation for incorrect answer
+                explanation.style.display = 'block'; // Show explanation for wrong answer
             }
 
             showNextQuestion();
@@ -234,7 +237,7 @@
             createQuiz();
         }
 
-        createQuiz();
+        createQuiz(); // First call to start the quiz
     </script>
 </body>
 </html>
