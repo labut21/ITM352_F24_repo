@@ -4,7 +4,7 @@ import pandas as pd
 
 pd.set_option('display.max_rows', None)
 
-data_URL = 'https://drive.google.com/uc?id=1-kvj2Ore88PGzZ9J7_lPBOvNf5C1ohpQ'
+data_URL = '/Users/lanceabut/Downloads/Trips from area 8.json'
 df = pd.read_json(data_URL)
 # Convert tips to numeric
 numbers_cols = ['fare', 'tips', 'trip_miles']
