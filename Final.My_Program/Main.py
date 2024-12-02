@@ -27,7 +27,8 @@ def add_task(tasks):
         "subject": subject,
         "description": description,
         "deadline": deadline,
-        "time_required": time_required
+        "time_required": time_required,
+        "time_logged": 0  # Initialize time logged to 0
     }
     
     tasks.append(task)
@@ -66,6 +67,7 @@ def view_tasks(tasks):
         print(f"  Description: {task['description']}")
         print(f"  Deadline: {task['deadline']}")
         print(f"  Estimated Time: {task['time_required']} hours\n")
+        print(f"  Time Logged: {task['time_logged']} hours\n")
 
 # Split tasks over available days with adjustments for weekends
 def split_task_over_days(task, increase_on_weekends=True):
@@ -106,8 +108,38 @@ def format_time(fractional_hours):
         minutes = 0
     return hours, minutes
 
-# Pomodoro timer
+# Pomodoro timer function (modified to use task and countdown)
+def start_pomodoro(task_name, work_time=25, break_time=5):
+    print(f"Starting Pomodoro for task: {task_name}")
+    for session in range(1, 5):  # 4 Pomodoro sessions (4 work sessions)
+        print(f"Session {session}: Work Time ({work_time} minutes)")
+        
+        # Countdown for work session
+        for t in range(work_time, 0, -1):
+            print(f"Work time remaining: {t} minutes", end="\r")
+            time.sleep(60)  # Countdown in minutes
+            
+        print(f"Session {session}: Break Time ({break_time} minutes)")
+        
+        # Countdown for break session
+        for t in range(break_time, 0, -1):
+            print(f"Break time remaining: {t} minutes", end="\r")
+            time.sleep(60)  # Countdown in minutes
+            
+    print("Pomodoro cycle complete! Take a longer break or continue.")
 
+# Log the time spent on a task and update the task data
+def log_time(tasks, task_name, time_spent):
+    task_found = False
+    for task in tasks:
+        if task["subject"] == task_name:
+            task["time_logged"] += time_spent
+            task_found = True
+            save_tasks(tasks)
+            print(f"Logged {time_spent} hours for task '{task_name}'.")
+            break
+    if not task_found:
+        print(f"Task '{task_name}' not found.")
 
 # Build study schedule based on tasks, prioritizing by deadlines and available time
 def build_schedule(tasks):
