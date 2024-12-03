@@ -21,10 +21,10 @@
         "time_logged": 0
     },
     {
-        "subject": "Management Information Systems",
+        "subject": "ITM 352",
         "description": "Code, debug, and submit final Python project.",
         "deadline": "2024-12-15",
         "time_required": 20.0,
-        "time_logged": 0
+        "time_logged": 0.016666666666666666
     }
 ]
