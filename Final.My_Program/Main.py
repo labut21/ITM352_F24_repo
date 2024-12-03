@@ -237,7 +237,7 @@ def display_schedule(schedule):
 
 def generate_report(tasks):
     """
-    Generates a summary report of total time spent per task and per subject.
+    Build a summary report of total time spent per task and per subject.
     """
     if not tasks:
         print("No tasks available for generating a report.\n")
