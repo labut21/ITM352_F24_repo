@@ -243,7 +243,7 @@ def generate_report(tasks):
         print("No tasks available for generating a report.\n")
         return
 
-    # Aggregate data for report
+    # Overall data for report
     subject_totals = defaultdict(float)
     task_details = []
 
