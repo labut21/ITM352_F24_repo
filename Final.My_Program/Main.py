@@ -249,28 +249,36 @@ def generate_report(tasks):
 
     for task in tasks:
         subject = task["subject"]
-        time_logged = task.get("time_logged", 0)
+        time_logged = task.get("time_logged", 0)  # Default to 0 if missing
         subject_totals[subject] += time_logged
         task_details.append({
             "Subject": subject,
-            "Task": task["description"],
-            "Time Logged": f"{time_logged:.2f} hours"
+            "Description": task.get("description", "No description"),  # Default value if missing
+            "Deadline": task.get("deadline", "No deadline"),           # Default value if missing
+            "Estimated Time": task.get("time_required", 0),            # Default to 0 if missing
+            "Time Logged": time_logged
         })
+
+    # Check if task_details is valid
+    if not task_details or not isinstance(task_details, list) or not all(isinstance(d, dict) for d in task_details):
+        print("Error: Task details are not in the correct format.\n")
+        return
+
+    # Print task details
+    print("\nTask Report:")
+    try:
+        print(tabulate(task_details, headers="keys", tablefmt="grid"))
+    except ValueError as e:
+        print("Error while generating task report:", e)
+        return
     
-    # Display subject summary
-    print("\nSummary of Total Time Logged per Subject:")
-    for subject, total_time in subject_totals.items():
-        print(f"- {subject}: {total_time:.2f} hours")
-    
-    # Display detailed task breakdown
-    print("\nDetailed Task Breakdown:")
-    if task_details:
-        print(tabulate(
-            task_details,
-            headers=["Subject", "Task", "Time Logged"],
-            tablefmt="grid"
-        ))
-    print()
+    # Print summary of time spent per subject
+    print("\nSubject Summary:")
+    subject_summary = [{"Subject": subject, "Total Time Logged": time} for subject, time in subject_totals.items()]
+    try:
+        print(tabulate(subject_summary, headers="keys", tablefmt="grid"))
+    except ValueError as e:
+        print("Error while generating subject summary:", e)
     
 # Main menu loop
 def main():
