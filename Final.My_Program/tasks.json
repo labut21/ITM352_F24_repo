@@ -3,24 +3,28 @@
         "subject": "HRM 351",
         "description": "Draft term paper and revise to final version.",
         "deadline": "2024-12-05",
-        "time_required": 6.0
+        "time_required": 6.0,
+        "time_logged": 0
     },
     {
         "subject": "BUS 313",
         "description": "Study concepts including trade blocs, trade policies, multinationals, and migration.",
         "deadline": "2024-12-11",
-        "time_required": 14.0
+        "time_required": 14.0,
+        "time_logged": 0
     },
     {
         "subject": "MGT 320",
         "description": "Write script for final pitch and revise company external positioning for final business plan.",
         "deadline": "2024-12-13",
-        "time_required": 16.0
+        "time_required": 16.0,
+        "time_logged": 0
     },
     {
         "subject": "Management Information Systems",
         "description": "Code, debug, and submit final Python project.",
         "deadline": "2024-12-15",
-        "time_required": 20.0
+        "time_required": 20.0,
+        "time_logged": 0
     }
 ]
