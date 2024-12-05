@@ -4,6 +4,59 @@ from datetime import datetime, timedelta
 import time
 from tabulate import tabulate
 from collections import defaultdict
+import re
+from datetime import datetime
+
+# Function to validate input
+def validate_input(input_type, value):
+    print(f"Validating {input_type} with value: {value}")  # Debugging line
+    
+    if input_type == "deadline":
+        # Validate date format: YYYY-MM-DD
+        try:
+            # Try to parse the date in the correct format
+            datetime.strptime(value, "%Y-%m-%d")
+            print(f"Deadline '{value}' is valid.")  # Debugging line
+            return True  # Valid deadline
+        except ValueError:
+            print(f"Invalid deadline format for '{value}'. Please use YYYY-MM-DD.")
+            return False  # Invalid deadline format
+    
+    elif input_type == "time":
+        # Validate if value is a positive float
+        try:
+            time = float(value)
+            if time > 0:
+                print(f"Time '{value}' is valid.")  # Debugging line
+                return True  # Valid time
+            else:
+                print("Time must be a positive number.")
+                return False  # Invalid time (negative or zero)
+        except ValueError:
+            print(f"Time '{value}' is invalid. Must be a number.")
+            return False  # Invalid time (not a number)
+    
+    return False  # For other types of input, if needed
+
+# Example of using validate_input
+def main():
+    # Validate Deadline Input
+    deadline = input("Enter a task deadline (YYYY-MM-DD): ")
+
+    # Call validate_input to check if the deadline format is correct
+    if validate_input("deadline", deadline):
+        print(f"Deadline '{deadline}' is valid.")
+    else:
+        print(f"Deadline '{deadline}' is invalid.")
+
+    # Validate Time Input
+    estimated_time = input("Enter estimated time for the task (in hours): ")
+
+    # Call validate_input to check if the time is a valid positive number
+    if validate_input("time", estimated_time):
+        print(f"Time '{estimated_time}' is valid.")
+    else:
+        print(f"Time '{estimated_time}' is invalid.")
 
 # Load tasks from a JSON file or start an empty list if the file doesn't exist
 def load_tasks(filename="tasks.json"):
@@ -21,12 +74,24 @@ def save_tasks(tasks, filename="tasks.json"):
     with open(filename, "w") as f:
         json.dump(tasks, f, indent=4)
 
+# Add a task with input validation
 def add_task(tasks):
     subject = input("Enter Subject: ")
     description = input("Enter Task Description: ")
-    deadline = input("Enter Deadline (YYYY-MM-DD): ")
-    time_required = float(input("Enter Estimated Time (hours): "))
     
+    # Get and validate deadline
+    while True:
+        deadline = input("Enter Deadline (YYYY-MM-DD): ")
+        if validate_input("deadline", deadline):
+            break
+    
+    # Get and validate estimated time
+    while True:
+        time_required = input("Enter Estimated Time (hours): ")
+        if validate_input("time", time_required):
+            time_required = float(time_required)  # Convert to float after validation
+            break
+
     task = {
         "subject": subject,
         "description": description,
@@ -328,6 +393,24 @@ def main():
             break
         else:
             print("Invalid choice, please try again.")
+
+# Validate Deadline Input
+    deadline = input("Enter a task deadline (YYYY-MM-DD): ")
+
+    # Call validate_input to check if the deadline format is correct
+    if validate_input("deadline", deadline):
+        print(f"Deadline '{deadline}' is valid.")
+    else:
+        print(f"Deadline '{deadline}' is invalid.")
+
+    # Validate Time Input
+    estimated_time = input("Enter estimated time for the task (in hours): ")
+
+    # Call validate_input to check if the time is a valid positive number
+    if validate_input("time", estimated_time):
+        print(f"Time '{estimated_time}' is valid.")
+    else:
+        print(f"Time '{estimated_time}' is invalid.")
 
 if __name__ == "__main__":
     main()
