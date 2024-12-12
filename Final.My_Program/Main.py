@@ -7,40 +7,39 @@ from collections import defaultdict
 import re
 from datetime import datetime
 
-# Function to validate input
+# Checks user inputs for correct date and time formats
 def validate_input(input_type, value):
     print(f"Validating {input_type} with value: {value}")  # Debugging line
     
     if input_type == "deadline":
-        # Validate date format: YYYY-MM-DD
+        # Check date format: YYYY-MM-DD
         try:
-            # Try to parse the date in the correct format
             datetime.strptime(value, "%Y-%m-%d")
-            print(f"Deadline '{value}' is valid.")  # Debugging line
-            return True  # Valid deadline
+            print(f"Deadline '{value}' is valid.")
+            return True
         except ValueError:
             print(f"Invalid deadline format for '{value}'. Please use YYYY-MM-DD.")
-            return False  # Invalid deadline format
+            return False
     
     elif input_type == "time":
-        # Validate if value is a positive float
+        # Check if value is a positive float
         try:
             time = float(value)
             if time > 0:
-                print(f"Time '{value}' is valid.")  # Debugging line
-                return True  # Valid time
+                print(f"Time '{value}' is valid.")
+                return True
             else:
                 print("Time must be a positive number.")
-                return False  # Invalid time (negative or zero)
+                return False
         except ValueError:
             print(f"Time '{value}' is invalid. Must be a number.")
-            return False  # Invalid time (not a number)
+            return False
     
     return False  # For other types of input, if needed
 
 # Example of using validate_input
 def main():
-    # Validate Deadline Input
+    # Check deadline input
     deadline = input("Enter a task deadline (YYYY-MM-DD): ")
 
     # Call validate_input to check if the deadline format is correct
@@ -49,7 +48,7 @@ def main():
     else:
         print(f"Deadline '{deadline}' is invalid.")
 
-    # Validate Time Input
+    # Validate time input
     estimated_time = input("Enter estimated time for the task (in hours): ")
 
     # Call validate_input to check if the time is a valid positive number
@@ -58,15 +57,12 @@ def main():
     else:
         print(f"Time '{estimated_time}' is invalid.")
 
-# Load tasks from a JSON file or start an empty list if the file doesn't exist
 def load_tasks(filename="tasks.json"):
     if os.path.exists(filename):
         with open(filename, "r") as f:
             tasks = json.load(f)
-            # Add 'time_logged' key if missing
             for task in tasks:
-                if "time_logged" not in task:
-                    task["time_logged"] = 0
+                task.setdefault("time_logged", 0)
             return tasks
     return []
 
@@ -74,56 +70,53 @@ def save_tasks(tasks, filename="tasks.json"):
     with open(filename, "w") as f:
         json.dump(tasks, f, indent=4)
 
-# Add a task with input validation
 def add_task(tasks):
     subject = input("Enter Subject: ")
     description = input("Enter Task Description: ")
-    
-    # Get and validate deadline
+
     while True:
         deadline = input("Enter Deadline (YYYY-MM-DD): ")
         if validate_input("deadline", deadline):
             break
-    
-    # Get and validate estimated time
+
     while True:
         time_required = input("Enter Estimated Time (hours): ")
         if validate_input("time", time_required):
-            time_required = float(time_required)  # Convert to float after validation
+            time_required = float(time_required)
             break
 
-    task = {
+    tasks.append({
         "subject": subject,
         "description": description,
         "deadline": deadline,
         "time_required": time_required,
-        "time_logged": 0  # Start time logged to 0
-    }
-    
-    tasks.append(task)
+        "time_logged": 0
+    })
     save_tasks(tasks)
     print("Task added successfully!\n")
 
-# Delete a task by its index
+# Delete a task by its index in the task list
+# This function was generated using ChatGPT with the prompt: "Improve the delete_task function with better error handling, and improve readabilty of the code."
 def delete_task(tasks):
+# Check if there are tasks to delete 
     if not tasks:
         print("No tasks available to delete.\n")
         return
-    
-    print("Tasks List:")
+
+# Show all tasks with an index for selection
     for idx, task in enumerate(tasks):
         print(f"{idx + 1}. {task['subject']} - {task['description']} (Deadline: {task['deadline']})")
-    
+
     try:
-        task_num = int(input("Enter the number of the task to delete: ")) - 1
+        task_num = int(input("Enter the task number to delete: ")) - 1 # Convert input to zero-based index
         if 0 <= task_num < len(tasks):
             removed_task = tasks.pop(task_num)
             save_tasks(tasks)
-            print(f"Task '{removed_task['subject']}' successfully deleted!\n")
+            print(f"Deleted task: {removed_task['subject']}\n")
         else:
-            print("Invalid task number. Please try again.\n")
+            print("Invalid task number.\n")
     except ValueError:
-        print("Invalid input. Please enter a number.\n")
+        print("Invalid input.\n")
 
 def view_tasks(tasks):
     if not tasks:
@@ -134,80 +127,66 @@ def view_tasks(tasks):
         print(f"  Subject: {task['subject']}")
         print(f"  Description: {task['description']}")
         print(f"  Deadline: {task['deadline']}")
-        print(f"  Estimated Time: {task['time_required']} hours\n")
+        print(f"  Estimated Time: {task['time_required']} hours")
         print(f"  Time Logged: {task['time_logged']} hours\n")
 
-# Split tasks over available days with adjustments for weekends
-def split_task_over_days(task, increase_on_weekends=True):
+# This function was generated using ChatGPT with the prompt: "Write a function to split study hours over days until a task's deadline, adjusting for weekends." 
+def split_task_over_days(task):
+
+# Convert deadline string to a datetime object and get today's data
     deadline = datetime.strptime(task["deadline"], "%Y-%m-%d")
     today = datetime.today()
-    
+
     if today > deadline:
-        print(f"Deadline for {task['subject']} has already passed!")
+        print(f"Deadline for {task['subject']} has passed!")
         return []
-    
+
     days_remaining = (deadline - today).days
+
+# Calculate the base number of study hours per day 
     hours_per_day = task["time_required"] / days_remaining
-    
+
     schedule = []
+
+# Loop through each day until the deadline 
     for i in range(days_remaining):
         study_day = today + timedelta(days=i)
-        is_weekend = study_day.weekday() in [5, 6]  # Saturday = 5, Sunday = 6
-        
-        if is_weekend and increase_on_weekends:
+
+# Adjust study hours for weekends (20% increase)
+        if study_day.weekday() in [5, 6]:  # Weekend
             adjusted_hours = hours_per_day * 1.20
         else:
             adjusted_hours = hours_per_day
-        
-        hours, minutes = format_time(adjusted_hours)
+
+        hours, minutes = divmod(adjusted_hours * 60, 60)
         schedule.append({
             "date": study_day.strftime("%Y-%m-%d"),
-            "hours": hours,
-            "minutes": minutes
+            "hours": int(hours),
+            "minutes": int(minutes)
         })
     return schedule
 
-# Arrange fractional hours into hours and minutes
-def format_time(fractional_hours):
-    hours = int(fractional_hours)
-    minutes = round((fractional_hours - hours) * 60)
-    if minutes == 60:
-        hours += 1
-        minutes = 0
-    return hours, minutes
-
-# Pomodoro timer function using task and countdown
+# Pomodoro timer
 def start_pomodoro(task_name, work_time=25, break_time=5):
     tasks = load_tasks()
-    total_time_worked = 0  # Track total time worked in minutes
-    print(f"Starting Pomodoro for task: {task_name}")
-    
+    total_time_worked = 0
+
+    print(f"Starting Pomodoro for: {task_name}")
     try:
-        for session in range(1, 5):  # 4 Pomodoro work sessions
-            print(f"Session {session}: Work Time ({work_time} minutes)")
-            
-            # Countdown for work session
-            for t in range(work_time, 0, -1):
-                print(f"Work time remaining: {t} minutes", end="\r")
-                time.sleep(60)  # Simulate countdown (minute)
-                total_time_worked += 1  # Increment total time worked
-                
-            log_time(tasks, task_name, total_time_worked / 60)  # Log progress periodically
-            
-            print(f"\nSession {session}: Break Time ({break_time} minutes)")
-            
-            # Countdown for break session
-            for t in range(break_time, 0, -1):
-                print(f"Break time remaining: {t} minutes", end="\r")
-                time.sleep(60)  # Simulate countdown (minute)
-            
-        print("\nPomodoro cycle complete! Take a longer break or continue.")
-    
+        for session in range(4):
+            print(f"Session {session + 1}: Work ({work_time} minutes)")
+            time.sleep(work_time * 60)
+            total_time_worked += work_time / 60
+
+            log_time(tasks, task_name, total_time_worked)
+
+            print(f"Session {session + 1}: Break ({break_time} minutes)")
+            time.sleep(break_time * 60)
+
+        print("Pomodoro complete! Take a longer break.")
     except KeyboardInterrupt:
-        # Handle user interrupt (Ctrl+C)
-        print("\nPomodoro interrupted. Logging time worked so far...")
-        log_time(tasks, task_name, total_time_worked / 60)  # Log time worked
-        print(f"Logged {total_time_worked / 60:.2f} hours for task '{task_name}'.")
+        print("Pomodoro interrupted. Logging progress...")
+        log_time(tasks, task_name, total_time_worked)
 
 # Record the time spent on a task and update the task data
 def log_time(tasks, task_name, time_spent):
@@ -222,130 +201,86 @@ def log_time(tasks, task_name, time_spent):
     if not task_found:
         print(f"Task '{task_name}' not found.")
 
-def build_schedule(tasks):
-    sorted_tasks = sorted(
-        tasks,
-        key=lambda x: datetime.strptime(x["deadline"], "%Y-%m-%d")
-    )
-    
-    available_time_per_day = float(input("Enter your daily available study time (hours): "))
-    print("\nGenerating Study Schedule...\n")
+def format_time(fractional_hours):
+# Converts a decimal number of hours into hours and minutes
+    hours = int(fractional_hours)
+    minutes = round((fractional_hours - hours) * 60)
+    return hours, minutes
 
+# This function was generated using ChatGPT with the prompt: "Help me write a function that builds a study schedule based on task deadlines and available study time."
+def build_schedule(tasks):
+
+# Sort the tasks by their deadline in ascending order
+    sorted_tasks = sorted(tasks, key=lambda x: datetime.strptime(x["deadline"], "%Y-%m-%d"))
+    available_time_per_day = float(input("Enter your daily available study time (hours): "))
     schedule = {}
     today = datetime.today()
-    
+
+# Loop through each task in the sorted list 
     for task in sorted_tasks:
-        task_deadline = datetime.strptime(task["deadline"], "%Y-%m-%d")
-        days_remaining = (task_deadline - today).days
-        
+        deadline = datetime.strptime(task["deadline"], "%Y-%m-%d")
+        days_remaining = (deadline - today).days
         if days_remaining <= 0:
-            print(f"Task '{task['subject']}' is overdue and won't be scheduled.\n")
+            print(f"Task '{task['subject']}' is overdue.")
             continue
-        
         time_required = task["time_required"]
         for day in range(days_remaining):
             study_date = today + timedelta(days=day)
-            study_date_str = study_date.strftime("%Y-%m-%d")
-            
-            # Check if date already has logged time, and calculate remaining time
-            allocated_time = sum(entry['hours'] + entry['minutes'] / 60 for entry in schedule.get(study_date_str, []))
+            date_str = study_date.strftime("%Y-%m-%d")
+            allocated_time = sum(entry["hours"] + entry["minutes"] / 60 for entry in schedule.get(date_str, []))
             remaining_time = available_time_per_day - allocated_time
-            
             if remaining_time > 0:
                 allocated_hours = min(remaining_time, time_required)
+# Decrease the remaining required time for the task 
                 time_required -= allocated_hours
-                
                 hours, minutes = format_time(allocated_hours)
-                
-                # Add to the schedule for the day
-                if study_date_str not in schedule:
-                    schedule[study_date_str] = []
-                
-                schedule[study_date_str].append({
+                schedule.setdefault(date_str, []).append({
                     "subject": task["subject"],
                     "description": task["description"],
                     "hours": hours,
                     "minutes": minutes
                 })
-                
-                # Stop logging time once the task is fully scheduled
                 if time_required <= 0:
                     break
-        
+
+# If there is still time left for the task that couldn't be fully scheduled, print a warning 
         if time_required > 0:
-            print(f"Warning: Not enough time to fully schedule task '{task['subject']}' before its deadline.\n")
-    
+            print(f"Not enough time to fully schedule task '{task['subject']}'.")
     display_schedule(schedule)
 
+# Shows the study schedule using the 'tabulate' library for a user-friendly tabular view
 def display_schedule(schedule):
     if not schedule:
-        print("No schedule to display.\n")
+        print("No schedule to display.")
         return
-    
     table_data = []
     for date, sessions in sorted(schedule.items()):
         for session in sessions:
             table_data.append([
-                date,
-                session["subject"],
-                session["description"],
-                f"{session['hours']} hours {session['minutes']} minutes"
+                date, session["subject"], session["description"], f"{session['hours']}h {session['minutes']}m"
             ])
-    
-    # Use tabulate to create a table
-    print("\nStudy Schedule:")
-    print(tabulate(
-        table_data,
-        headers=["Date", "Subject", "Task Description", "Study Time"],
-        tablefmt="grid"
-    ))
+    print(tabulate(table_data, headers=["Date", "Subject", "Description", "Study Time"], tablefmt="grid"))
 
 def generate_report(tasks):
-    """
-    Build a summary report of total time spent per task and per subject.
-    """
     if not tasks:
-        print("No tasks available for generating a report.\n")
+        print("No tasks available for report.")
         return
-
-    # Overall data for report
     subject_totals = defaultdict(float)
     task_details = []
-
     for task in tasks:
-        subject = task["subject"]
-        time_logged = task.get("time_logged", 0)  # Default to 0 if missing
-        subject_totals[subject] += time_logged
+        subject_totals[task["subject"]] += task["time_logged"]
         task_details.append({
-            "Subject": subject,
-            "Description": task.get("description", "No description"),  # Default value if missing
-            "Deadline": task.get("deadline", "No deadline"),           # Default value if missing
-            "Estimated Time": task.get("time_required", 0),            # Default to 0 if missing
-            "Time Logged": time_logged
+            "Subject": task["subject"],
+            "Description": task["description"],
+            "Deadline": task["deadline"],
+            "Estimated Time": task["time_required"],
+            "Time Logged": task["time_logged"]
         })
+    print(tabulate(task_details, headers="keys", tablefmt="grid"))
+    summary = [{"Subject": k, "Total Time Logged": v} for k, v in subject_totals.items()]
+    print(tabulate(summary, headers="keys", tablefmt="grid"))
 
-    # Check if task_details is valid
-    if not task_details or not isinstance(task_details, list) or not all(isinstance(d, dict) for d in task_details):
-        print("Error: Task details are not in the correct format.\n")
-        return
-
-    # Print task details
-    print("\nTask Report:")
-    try:
-        print(tabulate(task_details, headers="keys", tablefmt="grid"))
-    except ValueError as e:
-        print("Error while generating task report:", e)
-        return
-    
-    # Print summary of time spent per subject
-    print("\nSubject Summary:")
-    subject_summary = [{"Subject": subject, "Total Time Logged": time} for subject, time in subject_totals.items()]
-    try:
-        print(tabulate(subject_summary, headers="keys", tablefmt="grid"))
-    except ValueError as e:
-        print("Error while generating subject summary:", e)
-    
-# Main menu loop
+# Handles user inputs and calls the appropriate functions based on the user's choice
 def main():
     tasks = load_tasks()
     
@@ -356,7 +291,7 @@ def main():
         print("3. Delete a Task")
         print("4. Build Study Schedule")
         print("5. Start Pomodoro Timer")
-        print("6. Generate Report")  # New option for generating report
+        print("6. Generate Report")
         print("7. Exit")
         
         choice = input("Choose an option: ")
@@ -386,31 +321,13 @@ def main():
                     print("Invalid input. Please enter a valid task number.")
             else:
                 print("No tasks available. Please add tasks first.")
-        elif choice == '6':  # Call generate_report
+        elif choice == '6':
             generate_report(tasks)
         elif choice == '7':
             print("Goodbye!")
             break
         else:
             print("Invalid choice, please try again.")
-
-# Validate Deadline Input
-    deadline = input("Enter a task deadline (YYYY-MM-DD): ")
-
-    # Call validate_input to check if the deadline format is correct
-    if validate_input("deadline", deadline):
-        print(f"Deadline '{deadline}' is valid.")
-    else:
-        print(f"Deadline '{deadline}' is invalid.")
-
-    # Validate Time Input
-    estimated_time = input("Enter estimated time for the task (in hours): ")
-
-    # Call validate_input to check if the time is a valid positive number
-    if validate_input("time", estimated_time):
-        print(f"Time '{estimated_time}' is valid.")
-    else:
-        print(f"Time '{estimated_time}' is invalid.")
 
 if __name__ == "__main__":
     main()
