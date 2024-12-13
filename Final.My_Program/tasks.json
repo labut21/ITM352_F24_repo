@@ -21,10 +21,10 @@
         "time_logged": 14
     },
     {
-        "subject": "Chemistry",
-        "description": "Revise organic chemistry reactions",
-        "deadline": "2024-12-13",
-        "time_required": 2.0,
-        "time_logged": 0
+        "subject": "ITM 352",
+        "description": "Decode and submit final Python project",
+        "deadline": "2024-12-15",
+        "time_required": 4.0,
+        "time_logged": 3.5
     }
 ]
