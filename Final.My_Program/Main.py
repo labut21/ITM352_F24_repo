@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime, timedelta
 import time
+from plyer import notification
 from tabulate import tabulate
 from collections import defaultdict
 import re
@@ -60,10 +61,7 @@ def main():
 def load_tasks(filename="tasks.json"):
     if os.path.exists(filename):
         with open(filename, "r") as f:
-            tasks = json.load(f)
-            for task in tasks:
-                task.setdefault("time_logged", 0)
-            return tasks
+            return json.load(f)
     return []
 
 def save_tasks(tasks, filename="tasks.json"):
@@ -190,22 +188,58 @@ def start_pomodoro(task_name, work_time=25, break_time=5):
 
 # Record the time spent on a task and update the task data
 def log_time(tasks, task_name, time_spent):
-    task_found = False
     for task in tasks:
         if task["subject"] == task_name:
             task["time_logged"] += time_spent
-            task_found = True
             save_tasks(tasks)
-            print(f"Logged {time_spent} hours for task '{task_name}'.")
+            print(f"Logged {time_spent} hours for '{task_name}'.")
             break
-    if not task_found:
-        print(f"Task '{task_name}' not found.")
+
 
 def format_time(fractional_hours):
 # Converts a decimal number of hours into hours and minutes
     hours = int(fractional_hours)
     minutes = round((fractional_hours - hours) * 60)
     return hours, minutes
+
+def countdown_timer(seconds, label):
+    try:
+        while seconds > 0:
+            mins, secs = divmod(seconds, 60)
+            print(f"{mins:02}:{secs:02} {label}", end="\r")
+            time.sleep(1)
+            seconds -= 1
+    except KeyboardInterrupt:
+        print("\nPomodoro interrupted. Logging progress...")
+        raise
+
+# Pomodoro timer
+def start_pomodoro(task_name, work_time=25, break_time=5):
+    tasks = load_tasks()
+    total_time_worked = 0
+
+    print(f"Starting Pomodoro for: {task_name}")
+    try:
+        for session in range(4):
+
+            print(f"Session {session + 1}: Work ({work_time} minutes)")
+            countdown_timer(work_time * 60, "Work")
+            total_time_worked += work_time / 60
+            log_time(tasks, task_name, total_time_worked)
+
+
+            print(f"Session {session + 1}: Break ({break_time} minutes)")
+            countdown_timer(break_time * 60, "Break")
+
+        print("Pomodoro complete! Take a longer break.")
+        notification.notify(
+            title="Pomodoro Complete",
+            message="Pomodoro session complete! Take a longer break.",
+            timeout=10
+        )
+    except KeyboardInterrupt:
+        print("\nPomodoro interrupted. Logging progress...")
+        log_time(tasks, task_name, total_time_worked)
 
 # This function was generated using ChatGPT with the prompt: "Help me write a function that builds a study schedule based on task deadlines and available study time."
 def build_schedule(tasks):

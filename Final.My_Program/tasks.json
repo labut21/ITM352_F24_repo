@@ -4,27 +4,27 @@
         "description": "Draft term paper and revise to final version.",
         "deadline": "2024-12-19",
         "time_required": 6.0,
-        "time_logged": 0
+        "time_logged": 4
     },
     {
         "subject": "BUS 313",
         "description": "Study concepts including trade blocs, trade policies, multinationals, and migration.",
         "deadline": "2024-12-18",
         "time_required": 14.0,
-        "time_logged": 0
+        "time_logged": 12
     },
     {
         "subject": "MGT 320",
         "description": "Write script for final pitch and revise company external positioning for final business plan.",
         "deadline": "2024-12-20",
         "time_required": 16.0,
-        "time_logged": 0
+        "time_logged": 14
     },
     {
-        "subject": "ITM 352",
-        "description": "Code, and debug final Python project.",
-        "deadline": "2024-12-15",
-        "time_required": 4.0,
-        "time_logged": 0.016666666666666666
+        "subject": "Chemistry",
+        "description": "Revise organic chemistry reactions",
+        "deadline": "2024-12-13",
+        "time_required": 2.0,
+        "time_logged": 0
     }
 ]
